@@ -167,5 +167,10 @@ namespace _20190423_HomeWork
         {
             Crossover crossover = new Crossover(Vendors.Chevrolet, 170, 150);
         }
+
+        public class TestClass : IMyInterface
+        {
+            //Test
+        }
     }
 }
