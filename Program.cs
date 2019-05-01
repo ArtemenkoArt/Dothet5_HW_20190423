@@ -65,7 +65,6 @@ namespace _20190423_HomeWork
     #region VEHICLE
     public class Vehicle
     {
-        //public Vendors Vendor { get; protected set; }
         public uint CurrenSpeed { get; internal set; }
         public uint CurrenCargo { get; internal set; }
         public uint MaxSpeed { get; protected set; }
