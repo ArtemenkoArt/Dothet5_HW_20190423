@@ -6,12 +6,7 @@ using System.Threading.Tasks;
 
 namespace _20190423_HomeWork
 {
-
-    interface IMyInterface {}
-
-    public delegate int DelegateName(int param1);
-
-    public enum Vendors
+    public enum VendorsBrand
     {
         Ford = 1,
         Chevrolet,
@@ -19,22 +14,72 @@ namespace _20190423_HomeWork
         Hyundai
     }
 
+    public enum VehicleType
+    {
+        Truck,
+        Car
+    }
+
+    public enum TruckType
+    {
+        Tractor,
+        Van,
+        Onboard
+    }
+
+    public enum CarType
+    {
+        Sedan,
+        Hatchback,
+        Crossover
+    }
+
+    static class VehicleNumerator
+    {
+        public static VendorsBrand vendorsBrand { get; set; }
+        public static VehicleType vehicleType { get; set; }
+        public static TruckType truckType { get; set; }
+        public static CarType carType { get; set; }
+    }
+
+    public class Vendor
+    {
+        //public VendorsBrand vendorsBrand { get; protected set; }
+        public VendorsBrand brand { get; protected set; }
+        public Vehicle[] vehicles;
+
+        public Vehicle this[int i]
+        {
+            get => vehicles[i];
+
+            set => vehicles[i] = value;
+        }
+
+        public Vendor(VendorsBrand brand, int index)
+        {
+            this.brand = brand;
+            vehicles = new Vehicle[index];
+        }
+    }
+
+    #region VEHICLE
     public class Vehicle
     {
-        public Vendors Vendor { get; protected set; }
+        //public Vendors Vendor { get; protected set; }
         public uint CurrenSpeed { get; internal set; }
         public uint CurrenCargo { get; internal set; }
         public uint MaxSpeed { get; protected set; }
         public uint MaxCargo { get; protected set; }
+        private readonly VehicleType vehicleType;
 
-        public Vehicle(Vendors vendor, uint maxSpeed, uint maxCargo)
+        public Vehicle(VehicleType vehicleType, uint maxSpeed, uint maxCargo)
         {
-            Vendor = vendor;
             MaxSpeed = maxSpeed;
-            MaxCargo = MaxCargo;
+            MaxCargo = maxCargo;
+            this.vehicleType = vehicleType;
         }
 
-        public virtual void SetSpeed(int speed)
+        public void SetSpeed(int speed)
         {
             if (CurrenCargo >= MaxCargo) //cargo owerload
             {
@@ -60,9 +105,9 @@ namespace _20190423_HomeWork
             }
         }
 
-        public virtual void SetCargo(int cargo)
+        public void SetCargo(int cargo)
         {
-            if (CurrenSpeed != 0) //Load cargo if auto is stop
+            if (CurrenSpeed != 0) //Load cargo if vehicle is stop
             {
                 return;
             }
@@ -89,21 +134,33 @@ namespace _20190423_HomeWork
                 }
             }
         }
-    }
 
-    public class Truck : Vehicle
-    {
-        public Truck(Vendors vendor, uint maxSpeed, uint maxCargo) : base(vendor, maxSpeed, maxCargo)
+        public virtual string GetVehicleType()
         {
-            //
+            return Convert.ToString(vehicleType);
         }
-        //Tractor, Van, Onboard
+    }
+    #endregion VEHICLE
+
+    #region TRUCK
+    public class Truck : Vehicle //Tractor, Van, Onboard
+    {
+        private readonly TruckType truckType;
+
+        public Truck(TruckType truckType, uint maxSpeed, uint maxCargo) : base(VehicleType.Truck, maxSpeed, maxCargo)
+        {
+            this.truckType = truckType;
+        }
+
+        public override string GetVehicleType()
+        {
+            return Convert.ToString(truckType);
+        }
     }
 
     public class Tractor : Truck
     {
-        //
-        Tractor(Vendors vendor, uint maxSpeed, uint maxCargo) : base(vendor, maxSpeed, maxCargo)
+        public Tractor(uint maxSpeed, uint maxCargo) : base(TruckType.Tractor, maxSpeed, maxCargo)
         {
             //
         }
@@ -111,8 +168,7 @@ namespace _20190423_HomeWork
 
     public class Van : Truck
     {
-        //
-        Van(Vendors vendor, uint maxSpeed, uint maxCargo) : base(vendor, maxSpeed, maxCargo)
+        public Van(uint maxSpeed, uint maxCargo) : base(TruckType.Van, maxSpeed, maxCargo)
         {
             //
         }
@@ -120,25 +176,27 @@ namespace _20190423_HomeWork
 
     public class Onboard : Truck
     {
-        //
-        Onboard(Vendors vendor, uint maxSpeed, uint maxCargo) : base(vendor, maxSpeed, maxCargo)
+        public Onboard(uint maxSpeed, uint maxCargo) : base(TruckType.Onboard, maxSpeed, maxCargo)
         {
             //
         }
     }
+    #endregion TRUCK
 
-    public class Car : Vehicle
+    #region CAR
+    public class Car : Vehicle //Sedan, Hatchback, Crossover
     {
-        public Car(Vendors vendor, uint maxSpeed, uint maxCargo) : base(vendor, maxSpeed, maxCargo)
+        private readonly CarType carType;
+
+        public Car(CarType carType, uint maxSpeed, uint maxCargo) : base(VehicleType.Car, maxSpeed, maxCargo)
         {
-            //
+            this.carType = carType;
         }
-        //Sedan, Hatchback, Crossover
     }
 
     public class Crossover : Car
     {
-        public Crossover(Vendors vendor, uint maxSpeed, uint maxCargo) : base(vendor, maxSpeed, maxCargo)
+        public Crossover(uint maxSpeed, uint maxCargo) : base(CarType.Crossover, maxSpeed, maxCargo)
         {
             //
         }
@@ -146,31 +204,62 @@ namespace _20190423_HomeWork
 
     public class Sedan : Car
     {
-        //
-        public Sedan(Vendors vendor, uint maxSpeed, uint maxCargo) : base(vendor,  maxSpeed, maxCargo)
+        public Sedan(uint maxSpeed, uint maxCargo) : base(CarType.Sedan,  maxSpeed, maxCargo)
         {
             //
         }
     }
     public class Hatchback : Car
     {
-        //
-        public Hatchback(Vendors vendor, uint maxSpeed, uint maxCargo) : base(vendor, maxSpeed, maxCargo)
+        public Hatchback(uint maxSpeed, uint maxCargo) : base(CarType.Hatchback, maxSpeed, maxCargo)
         {
             //
         }
     }
+    #endregion CAR
 
+    #region BODY PROGRAM
     class Program
     {
-        static void Main(string[] args)
+        static void DoSomethingWithVehicleList(Vendor vendor)
         {
-            Crossover crossover = new Crossover(Vendors.Chevrolet, 170, 150);
+            foreach (Vehicle vehicle in vendor.vehicles)
+            {
+                if (vehicle is Truck)
+                {
+                    //
+                }
+                else if (vehicle is Car)
+                {
+                    //
+                }
+            }
         }
 
-        public class TestClass : IMyInterface
+        static void Main(string[] args)
         {
-            //Test
+            Vendor toyota = new Vendor(VendorsBrand.Ford, 7);
+            toyota.vehicles[0] = new Tractor(50, 10000);
+            toyota.vehicles[6] = new Tractor(60, 20000);
+            toyota.vehicles[1] = new Van(120, 8000);
+            toyota.vehicles[2] = new Onboard(170, 5000);
+            toyota.vehicles[3] = new Crossover(150, 400);
+            toyota.vehicles[4] = new Sedan(170, 350);
+            toyota.vehicles[5] = new Hatchback(160, 300);
+
+
+
+            //List<Vehicle> cars = new List<Vehicle>();
+            //cars.Add(new Tractor(50, 10000));
+            //cars.Add(new Van(120, 8000));
+            //cars.Add(new Onboard(170, 5000));
+
+            //cars.Add(new Crossover(150, 400));
+            //cars.Add(new Sedan(170, 350));
+            //cars.Add(new Hatchback(160, 300));
+
+            DoSomethingWithVehicleList(toyota);
         }
     }
+    #endregion  BODY PROGRAM
 }
